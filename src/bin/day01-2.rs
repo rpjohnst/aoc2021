@@ -1,0 +1,18 @@
+#![feature(array_windows)]
+
+use std::{error::Error, fs, str::FromStr};
+use aoc2021::day01::IteratorExt;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let input = fs::read_to_string("input/day01")?;
+    let depths: Vec<_> = Result::from_iter(input.split_terminator('\n').map(u32::from_str))?;
+
+    let count = depths.array_windows()
+        .map(|&[a, b, c]| a + b + c)
+        .pair_windows()
+        .filter(|[a, b]| a < b)
+        .count();
+    println!("{}", count);
+
+    Ok(())
+}
