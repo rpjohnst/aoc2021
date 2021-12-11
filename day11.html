@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Advent of Code 2021 - Day 11</title>
+        <style type="text/css">
+            #table td { width: 24px; height: 24px; }
+            #table td.e0 { background-color: #000000; }
+            #table td.e1 { background-color: #181818; }
+            #table td.e2 { background-color: #303030; }
+            #table td.e3 { background-color: #484848; }
+            #table td.e4 { background-color: #606060; }
+            #table td.e5 { background-color: #787878; }
+            #table td.e6 { background-color: #909090; }
+            #table td.e7 { background-color: #a8a8a8; }
+            #table td.e8 { background-color: #c0c0c0; }
+            #table td.e9 { background-color: #d8d8d8; }
+            #table td.flash { background-color: #f8f844; }
+        </style>
+    </head>
+    <body>
+        <table id="table"></table>
+        <script type="module">
+            const table = document.getElementById("table");
+            for (let y = 0; y < 10; y += 1) {
+                const tr = document.createElement("tr");
+                table.appendChild(tr);
+
+                for (let x = 0; x < 10; x += 1) {
+                    const td = document.createElement("td");
+                    tr.appendChild(td);
+                }
+            }
+
+            let len = 10;
+            const grid = [
+                [4,1,3,4,3,8,4,6,2,6],
+                [7,1,1,4,5,8,5,2,5,7],
+                [1,5,8,2,5,3,6,4,8,8],
+                [4,8,6,5,7,1,5,5,3,8],
+                [5,7,3,3,4,2,3,5,1,3],
+                [8,5,3,2,1,4,4,1,8,1],
+                [1,2,8,8,6,1,4,5,8,3],
+                [2,2,4,8,7,1,1,1,4,1],
+                [6,4,1,5,8,7,1,6,8,1],
+                [7,8,8,1,5,3,1,4,3,8],
+            ];
+
+            const flash = new Set();
+            const stack = [];
+            for (let step = 1; ; step += 1) {
+                for (let y = 0; y < len; y += 1) {
+                    for (let x = 0; x < len; x += 1) {
+                        grid[y][x] += 1;
+                        if (grid[y][x] > 9 && !flash.has(len * y + x)) {
+                            flash.add(len * y + x);
+                            stack.push([x, y]);
+                        }
+                    }
+                }
+                while (stack.length > 0) {
+                    const [fx, fy] = stack.pop();
+                    for (let y = Math.max(0, fy - 1); y <= Math.min(fy + 1, len - 1); y += 1) {
+                        for (let x = Math.max(0, fx - 1); x <= Math.min(fx + 1, len - 1); x += 1) {
+                            grid[y][x] += 1;
+                            if (grid[y][x] > 9 && !flash.has(len * y + x)) {
+                                flash.add(len * y + x);
+                                stack.push([x, y]);
+                            }
+                        }
+                    }
+                }
+                for (const f of flash.values()) {
+                    const fy = Math.floor(f / len);
+                    const fx = f % len;
+                    grid[fy][fx] = 0;
+                }
+
+                for (let y = 0; y < len; y += 1) {
+                    for (let x = 0; x < len; x += 1) {
+                        table.children[y].children[x].className = `e${grid[y][x]}`;
+                    }
+                }
+                for (const f of flash.values()) {
+                    const fy = Math.floor(f / len);
+                    const fx = f % len;
+                    table.children[fx].children[fy].className = "flash";
+                }
+                flash.clear();
+
+                await new Promise(resolve => setTimeout(resolve, 60));
+            }
+        </script>
+    </body>
+</html>
