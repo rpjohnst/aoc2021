@@ -15,8 +15,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         let cave = caves.len();
         let w = *caves.entry(w).or_insert(cave);
 
-        edges.push((v, w));
-        edges.push((w, v));
+        if caves.get("start") != Some(&w) { edges.push((v, w)); }
+        if caves.get("start") != Some(&v) { edges.push((w, v)); }
     }
 
     let mut large = Vec::from_iter(iter::repeat(false).take(caves.len()));
@@ -36,7 +36,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let paths = visit(
         &rs[..], &js[..], &large[..],
         &mut visited[..], &mut extra,
-        caves["start"], caves["start"], caves["end"]
+        caves["start"], caves["end"]
     );
     println!("{}", paths);
 
@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn visit(
     rs: &[usize], js: &[usize], large: &[bool],
     visited: &mut [u8], extra: &mut bool,
-    start: usize, v: usize, w: usize
+    v: usize, w: usize
 ) -> usize {
     if v == w { return 1; }
 
@@ -54,10 +54,10 @@ fn visit(
     if !large[v] { visited[v] += 1; }
     for &u in &js[rs[v + 0]..rs[v + 1]] {
         if visited[u] == 0 {
-            paths += visit(rs, js, large, visited, extra, start, u, w);
-        } else if !*extra && u != start && u != w {
+            paths += visit(rs, js, large, visited, extra, u, w);
+        } else if !*extra {
             *extra = true;
-            paths += visit(rs, js, large, visited, extra, start, u, w);
+            paths += visit(rs, js, large, visited, extra, u, w);
             *extra = false;
         }
     }
